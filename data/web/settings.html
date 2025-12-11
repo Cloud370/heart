@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>小米手环心率配置</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button:disabled {
+            background: #ccc;
+        }
+
+        #device-list {
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+        }
+
+        #device-list li {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #status {
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>小米手环心率配置</h1>
+        <div id="current-status">
+            当前心率: <span id="hr-display">--</span>
+        </div>
+        <div style="margin-top: 20px;">
+            <button id="scan-btn" onclick="startScan()">扫描设备</button>
+            <span id="status"></span>
+        </div>
+        <ul id="device-list">
+        </ul>
+
+        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+            <h2>主题设置</h2>
+            <div id="theme-preview-container"
+                style="margin-bottom: 20px; text-align: center; padding: 40px; background: #888; border-radius: 8px; display: flex; justify-content: center;">
+                <!-- Updated structure for preview -->
+                <div id="heart-rate-container">
+                    <div class="heart-visual">
+                        <svg viewBox="0 0 32 29.6" class="heart-svg">
+                            <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+                            c6.1-9.3,16-11.8,16-21.2C32,3.8,28.2,0,23.6,0z" />
+                        </svg>
+                        <div class="heart-pulse-ring"></div>
+                    </div>
+                    <div class="value-wrapper">
+                        <span id="heart-rate-value">75</span>
+                        <span id="heart-rate-unit">BPM</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="setTheme('default')" style="background: #ff4d4d">默认</button>
+                <button onclick="setTheme('cyberpunk')"
+                    style="background: #000; color: #0ff; border: 1px solid #0ff">赛博朋克</button>
+                <button onclick="setTheme('minimal')"
+                    style="background: #fff; color: #333; border: 1px solid #ccc">极简</button>
+                <button onclick="setTheme('nature')" style="background: #2e8b57">自然</button>
+                <button onclick="setTheme('retro')" style="background: #330000; color: #ffcc00">复古</button>
+            </div>
+        </div>
+        <div style="margin-top: 20px; text-align: center; color: #999; font-size: 12px;">
+            作者: 云
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script>
+        function setTheme(theme) {
+            // Save to server
+            fetch('/api/theme', {
+                method: 'POST',
+                body: JSON.stringify({ theme: theme }),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(() => {
+                // Update local preview
+                const preview = document.getElementById('theme-preview-container');
+                preview.className = 'theme-' + theme;
+            });
+        }
+
+        // Load initial theme from server
+        fetch('/api/theme')
+            .then(r => r.json())
+            .then(data => {
+                if (data.theme) {
+                    const preview = document.getElementById('theme-preview-container');
+                    preview.className = 'theme-' + data.theme;
+                }
+            });
+
+        startHRPoll();
+        // Poll for devices if scanning
+        setInterval(() => {
+            if (isScanning) {
+                fetch('/api/devices')
+                    .then(r => r.json())
+                    .then(devices => {
+                        const list = document.getElementById('device-list');
+                        list.innerHTML = '';
+                        devices.forEach(d => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <span>${d.name} <small>(${d.id})</small></span>
+                                <button onclick="connect('${d.id}')">连接</button>
+                            `;
+                            list.appendChild(li);
+                        });
+                    });
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>
