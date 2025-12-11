@@ -106,3 +106,27 @@ function(target_add_resource target resource)
   )
   source_group("Resources" FILES "${resource}")
 endfunction()
+
+# configure_windows_installer: Configure InnoSetup installer script
+function(configure_windows_installer target)
+  set(UUID_APP "E993CC46-144D-499F-A282-F3C9BF0E0858")
+
+  configure_file(
+    cmake/windows/resources/installer-windows.iss.in "${CMAKE_CURRENT_SOURCE_DIR}/release/${target}-windows-x64.iss"
+  )
+
+  find_program(ISCC_EXECUTABLE iscc HINTS "C:/Program Files (x86)/Inno Setup 6" "C:/Program Files/Inno Setup 6")
+
+  if(ISCC_EXECUTABLE)
+    add_custom_target(
+      package
+      COMMAND "${CMAKE_COMMAND}" --install "${CMAKE_BINARY_DIR}" --config $<CONFIG> --prefix "${CMAKE_CURRENT_SOURCE_DIR}/release"
+      COMMAND "${ISCC_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/release/${target}-windows-x64.iss" "/O${CMAKE_CURRENT_SOURCE_DIR}/release/Output"
+      DEPENDS ${target}
+      COMMENT "Creating installer package"
+      VERBATIM
+    )
+  else()
+    message(WARNING "InnoSetup compiler (iscc) not found. 'package' target will not be available.")
+  endif()
+endfunction()

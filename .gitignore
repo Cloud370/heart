@@ -7,6 +7,7 @@
 !/cmake
 !/data
 !/src
+!/release
 !.clang-format
 !.gersemirc
 !.gitignore
@@ -24,3 +25,7 @@
 
 # Exclude CMake build number cache
 /cmake/.CMakeBuildNumber
+
+# Exclude generated release files (keep only .gitkeep)
+/release/*
+!/release/.gitkeep
