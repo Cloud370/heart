@@ -3,160 +3,1010 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>小米手环心率配置</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Modern CSS Variables & Reset */
+        :root {
+            --primary: #4e54c8;
+            --primary-hover: #3f44a5;
+            --accent: #8f94fb;
+            --bg-page: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-main: #2c3e50;
+            --text-sub: #7f8c8d;
+            --border: #e1e8ed;
+            --danger: #ff6b6b;
+            --success: #2ecc71;
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
             padding: 20px;
-            background: #f0f0f0;
+            line-height: 1.6;
+            /* Override style.css shared styles */
+            overflow-y: auto;
+            height: auto;
+            display: block; /* Override flex from style.css */
+        }
+
+        /* Layout & Containers */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            gap: 24px;
         }
 
         .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            margin: 0 auto;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            border: 1px solid white;
         }
 
-        h1 {
-            margin-top: 0;
-            font-size: 24px;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
         }
 
-        button {
-            padding: 10px 20px;
-            cursor: pointer;
-            background: #007bff;
+        .card-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            padding: 6px 16px;
+            border-radius: 50px;
+            background: #f1f2f6;
+            color: #747d8c;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.5px;
+        }
+
+        /* Connected: Vibrant Gradient Green with Shadow */
+        .status-badge.connected {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Disconnected: Soft Red/Orange */
+        .status-badge.disconnected {
+            background: #ffeaa7;
+            color: #d63031;
+            background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(214, 48, 49, 0.2);
+        }
+
+        .status-badge::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            opacity: 0.8;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 18px;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        button:hover {
-            background: #0056b3;
+        .btn-primary {
+            background: var(--primary);
+            color: white;
         }
 
-        button:disabled {
-            background: #ccc;
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
-        #device-list {
-            margin-top: 20px;
-            list-style: none;
+        .btn-danger {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
+
+        .btn-secondary {
+            background: #f1f2f6;
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: #dfe4ea;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Form Controls */
+        .control-section {
+            margin-bottom: 24px;
+        }
+
+        .control-section h3 {
+            font-size: 1rem;
+            color: var(--text-sub);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding: 4px 0;
+        }
+
+        label {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: #f8f9fa;
+            font-family: inherit;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            overflow: hidden;
+            padding: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
             padding: 0;
         }
 
-        #device-list li {
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        input[type="range"] {
+            width: 120px;
+            accent-color: var(--primary);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Theme Grid */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .theme-item {
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
             background: #fff;
-            border-bottom: 1px solid #eee;
-            padding: 10px;
+        }
+
+        .theme-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .theme-item.active {
+            border-color: var(--primary);
+            background: rgba(78, 84, 200, 0.05);
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Preview Area */
+        #preview-wrapper {
+            background-color: #e0e0e0;
+            background-image:
+                linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+
+            border-radius: var(--radius-md);
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 220px;
+            margin-bottom: 24px;
+            position: relative;
+            /* overflow: hidden; Removed to allow shadows to be visible */
+            border: 1px solid var(--border);
+        }
+
+        /* Device List */
+        #device-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .device-li {
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        #status {
-            margin-top: 10px;
-            color: #666;
+        .device-name {
+            font-weight: 600;
+        }
+
+        .device-id {
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+
+        /* Responsive Grid for Settings */
+        .settings-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .settings-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 24px;
+            flex-wrap: wrap; /* Changed from overflow-x: auto to wrap */
+            padding-bottom: 2px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+            background: rgba(78, 84, 200, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            background: rgba(78, 84, 200, 0.1);
+            position: relative;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 
 <body>
-    <div class="card">
-        <h1>小米手环心率配置</h1>
-        <div id="current-status">
-            当前心率: <span id="hr-display">--</span>
-        </div>
-        <div style="margin-top: 20px;">
-            <button id="scan-btn" onclick="startScan()">扫描设备</button>
-            <span id="status"></span>
-        </div>
-        <ul id="device-list">
-        </ul>
 
-        <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-            <h2>主题设置</h2>
-            <div id="theme-preview-container"
-                style="margin-bottom: 20px; text-align: center; padding: 40px; background: #888; border-radius: 8px; display: flex; justify-content: center;">
-                <!-- Updated structure for preview -->
+    <div class="container">
+        <!-- Device Connection Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 11a9 9 0 0 1 9 9"></path>
+                        <path d="M4 4a16 16 0 0 1 16 16"></path>
+                        <circle cx="5" cy="19" r="1"></circle>
+                    </svg>
+                    设备连接
+                </h2>
+                <span id="connection-badge" class="status-badge disconnected">未连接</span>
+            </div>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+                <button class="btn btn-primary" id="scan-btn" onclick="startScan()">扫描设备</button>
+                <button class="btn btn-danger" id="disconnect-btn" onclick="disconnect()" disabled>断开连接</button>
+                <button class="btn btn-secondary" id="reset-btn" onclick="reset()">重置</button>
+            </div>
+
+            <div id="status" style="margin-bottom: 12px; color: var(--text-sub); font-size: 0.9rem; min-height: 20px;">
+            </div>
+            <ul id="device-list"></ul>
+        </div>
+
+        <!-- Configuration Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                    外观配置
+                </h2>
+                <button class="btn btn-primary" onclick="saveConfig()">保存并应用</button>
+            </div>
+
+            <!-- Live Preview -->
+            <div id="preview-wrapper">
                 <div id="heart-rate-container">
-                    <div class="heart-visual">
-                        <svg viewBox="0 0 32 29.6" class="heart-svg">
-                            <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
-                            c6.1-9.3,16-11.8,16-21.2C32,3.8,28.2,0,23.6,0z" />
-                        </svg>
-                        <div class="heart-pulse-ring"></div>
+                    <div class="top-row">
+                        <div class="heart-visual">
+                            <svg viewBox="0 0 32 29.6" class="heart-svg">
+                                <path
+                                    d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2 c6.1-9.3,16-11.8,16-21.2C32,3.8,28.2,0,23.6,0z" />
+                            </svg>
+                            <div class="heart-pulse-ring"></div>
+                        </div>
+                        <div class="value-wrapper">
+                            <span id="heart-rate-value">--</span>
+                            <span id="heart-rate-unit">BPM</span>
+                        </div>
                     </div>
-                    <div class="value-wrapper">
-                        <span id="heart-rate-value">75</span>
-                        <span id="heart-rate-unit">BPM</span>
+                    <canvas id="heart-waveform" width="200" height="30" style="display: none; width: 100%; height: 30px; margin-top: 5px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('style', this)">外观样式</button>
+                <button class="tab-btn" onclick="switchTab('layout', this)">布局设置</button>
+                <button class="tab-btn" onclick="switchTab('features', this)">功能选项</button>
+            </div>
+
+            <!-- Tab: Style -->
+            <div id="tab-style" class="tab-content active">
+                
+                <!-- Presets at top -->
+                <div class="control-section">
+                    <h3>预设主题 (Presets)</h3>
+                    <div class="theme-grid">
+                        <div class="theme-item" onclick="applyPreset('default')">默认</div>
+                        <div class="theme-item" onclick="applyPreset('cyberpunk')">赛博朋克</div>
+                        <div class="theme-item" onclick="applyPreset('minimal')">极简</div>
+                        <div class="theme-item" onclick="applyPreset('nature')">自然</div>
+                        <div class="theme-item" onclick="applyPreset('retro')">复古</div>
+                    </div>
+                </div>
+
+                <div class="settings-columns">
+                    <!-- Left Column: Heart & Animation -->
+                    <div>
+                        <div class="control-section">
+                            <h3>心跳图标 (Heart Icon)</h3>
+                            <div class="control-row">
+                                <label>图标颜色</label>
+                                <input type="color" id="heart-color" oninput="updateUI()">
+                            </div>
+                            <div class="control-row">
+                                <label>跳动动画</label>
+                                <select id="animation-type" onchange="updateUI()" style="width: 150px;">
+                                    <option value="beat">跳动 (Beat)</option>
+                                    <option value="pulse-ring">波纹 (Pulse)</option>
+                                    <option value="none">无 (None)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="control-section">
+                            <h3>跳动特效 (Pulse Effect)</h3>
+                            <div class="control-row">
+                                <label>特效颜色</label>
+                                <input type="color" id="pulse-color" oninput="updateUI()">
+                            </div>
+                             <div class="control-row" style="font-size: 0.8rem; color: var(--text-sub);">
+                                提示：仅在"波纹"动画下生效
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Text & Waveform -->
+                    <div>
+                        <div class="control-section">
+                            <h3>数值与文字 (Data & Text)</h3>
+                            <div class="control-row">
+                                <label>文字颜色</label>
+                                <input type="color" id="text-color" oninput="updateUI()">
+                            </div>
+                            <div class="control-row">
+                                <label>字体样式</label>
+                                <select id="font-family" onchange="updateUI()" style="width: 150px;">
+                                    <option value="'Roboto', sans-serif">默认 (Roboto)</option>
+                                    <option value="'Orbitron', sans-serif">赛博 (Orbitron)</option>
+                                    <option value="'Press Start 2P', cursive">像素 (Pixel)</option>
+                                    <option value="'Montserrat', sans-serif">粗体 (Montserrat)</option>
+                                    <option value="'Microsoft YaHei', sans-serif">微软雅黑</option>
+                                </select>
+                            </div>
+                            <div class="control-row">
+                                <label>边缘泛光</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="color" id="text-shadow-color" oninput="updateUI()">
+                                    <input type="range" id="text-shadow-blur" min="0" max="20" value="0"
+                                        oninput="updateUI()" style="width: 80px;" title="泛光大小">
+                                </div>
+                            </div>
+                             <div class="control-row">
+                                <label>显示单位 (BPM)</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="show-bpm-text" onchange="updateUI()" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="control-section">
+                            <h3>心率曲线 (Waveform)</h3>
+                            <div class="control-row">
+                                <label>显示曲线</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="show-waveform" onchange="updateUI()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="control-row">
+                                <label>曲线颜色</label>
+                                <input type="color" id="waveform-color" oninput="updateUI()">
+                            </div>
+                            <div class="control-row">
+                                <label>曲线模式</label>
+                                <select id="waveform-mode" onchange="updateUI()" style="width: 150px;">
+                                    <option value="ecg">心电图 (ECG)</option>
+                                    <option value="trend">趋势图 (Trend)</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button onclick="setTheme('default')" style="background: #ff4d4d">默认</button>
-                <button onclick="setTheme('cyberpunk')"
-                    style="background: #000; color: #0ff; border: 1px solid #0ff">赛博朋克</button>
-                <button onclick="setTheme('minimal')"
-                    style="background: #fff; color: #333; border: 1px solid #ccc">极简</button>
-                <button onclick="setTheme('nature')" style="background: #2e8b57">自然</button>
-                <button onclick="setTheme('retro')" style="background: #330000; color: #ffcc00">复古</button>
+
+            <!-- Tab: Layout -->
+            <div id="tab-layout" class="tab-content">
+                <div class="settings-columns">
+                    <div>
+                        <div class="control-section">
+                            <h3>布局模式</h3>
+                            <div class="control-row" style="background: #f8f9fa; padding: 12px; border-radius: 8px;">
+                                <div>
+                                    <div style="font-weight: 600;">卡片模式</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-sub);">开启背景框和阴影</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="layout-toggle" onchange="updateUI()">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="control-section" style="margin-top: 20px; font-size: 0.85rem; color: var(--text-sub);">
+                            <p>提示：<br>在OBS中添加浏览器源时，请勾选“控制音频”以保持连接活跃。建议尺寸: 300x150。</p>
+                        </div>
+                    </div>
+                    <div>
+                         <div id="card-options" class="control-section"
+                            style="opacity: 0.5; pointer-events: none; transition: all 0.3s;">
+                            <h3>卡片设置</h3>
+                            <div class="control-row">
+                                <label>卡片背景色</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="color" id="card-bg-color" value="#ffffff" oninput="updateUI()">
+                                    <input type="range" id="card-bg-opacity" min="0" max="1" step="0.05" value="1"
+                                        oninput="updateUI()" style="width: 80px;" title="不透明度">
+                                </div>
+                            </div>
+                            <div class="control-row">
+                                <label>圆角大小</label>
+                                <input type="range" id="card-radius" min="0" max="50" value="10" oninput="updateUI()">
+                            </div>
+                            <div class="control-row">
+                                <label>阴影强度</label>
+                                <input type="range" id="card-shadow-strength" min="0" max="1" step="0.1" value="0.2"
+                                    oninput="updateUI()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div style="margin-top: 20px; text-align: center; color: #999; font-size: 12px;">
-            作者: 云
+
+            <!-- Tab: Features -->
+            <div id="tab-features" class="tab-content">
+                 <div class="settings-columns">
+                    <div>
+                        <div class="control-section">
+                            <h3>其他功能</h3>
+                            <div style="color: var(--text-sub); font-size: 0.9rem;">
+                                更多高级功能敬请期待...
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+
         </div>
     </div>
+
     <script src="script.js"></script>
     <script>
-        function setTheme(theme) {
-            // Save to server
-            fetch('/api/theme', {
-                method: 'POST',
-                body: JSON.stringify({ theme: theme }),
-                headers: { 'Content-Type': 'application/json' }
-            }).then(() => {
-                // Update local preview
-                const preview = document.getElementById('theme-preview-container');
-                preview.className = 'theme-' + theme;
-            });
+        // --- Tabs Logic ---
+        function switchTab(tabId, btn) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            // Show target tab
+            document.getElementById('tab-' + tabId).classList.add('active');
+            if(btn) btn.classList.add('active');
         }
 
-        // Load initial theme from server
-        fetch('/api/theme')
-            .then(r => r.json())
-            .then(data => {
-                if (data.theme) {
-                    const preview = document.getElementById('theme-preview-container');
-                    preview.className = 'theme-' + data.theme;
-                }
-            });
+        // --- Configuration Logic ---
 
-        startHRPoll();
-        // Poll for devices if scanning
-        setInterval(() => {
-            if (isScanning) {
-                fetch('/api/devices')
-                    .then(r => r.json())
-                    .then(devices => {
+        // Default configs
+        const THEME_PRESETS = {
+            'default': {
+                textColor: '#333333', font: "'Roboto', sans-serif",
+                heartColor: '#ff4d4d', pulseColor: '#ff4d4d',
+                animation: 'beat', cardBg: '#ffffff',
+                showBpmText: true, showWaveform: true
+            },
+            'cyberpunk': {
+                textColor: '#0ff', font: "'Orbitron', sans-serif", textShadow: '0 0 5px #0ff',
+                textShadowColor: '#00ffff', textShadowBlur: 5,
+                heartColor: '#f0f', heartFilter: 'drop-shadow(0 0 5px #f0f)',
+                pulseColor: '#0ff', pulseBorder: '2px solid #0ff', pulseShadow: '0 0 10px #0ff',
+                animation: 'pulse-ring', cardBg: '#000000',
+                showBpmText: true, showWaveform: true
+            },
+            'minimal': {
+                textColor: '#000', font: "'Roboto', sans-serif",
+                heartColor: '#000', pulseColor: '#000', pulseBorder: '1px solid #000',
+                animation: 'beat', cardBg: '#ffffff',
+                showBpmText: true, showWaveform: true
+            },
+            'nature': {
+                textColor: '#2e8b57', font: "'Montserrat', sans-serif", textShadow: '1px 1px 2px rgba(0,0,0,0.2)',
+                heartColor: '#2e8b57', pulseColor: 'transparent', pulseBackground: 'rgba(46, 139, 87, 0.2)',
+                animation: 'pulse-ring', cardBg: '#f0fff4'
+            },
+            'retro': {
+                textColor: '#ffcc00', font: "'Press Start 2P', cursive", textShadow: '2px 2px 0 #330000',
+                heartColor: '#cc0000', heartFilter: 'drop-shadow(2px 2px 0 #330000)',
+                pulseColor: '#cc0000', pulseBorder: '4px solid #cc0000',
+                animation: 'beat', cardBg: '#2d0000'
+            }
+        };
+
+        // Current State
+        let currentConfig = {
+            layoutMode: 'full', // 'full' or 'card'
+            // Colors & Theme
+            textColor: '#333333',
+            heartColor: '#ff4d4d',
+            pulseColor: '#ff4d4d',
+            waveformColor: '#333333', // Added independent waveform color
+            font: "'Roboto', sans-serif",
+            animation: 'beat',
+            // Card specific
+            bgColor: '#ffffff',
+            bgOpacity: 1,
+            boxRadius: '10px',
+            boxShadowStrength: 0.2,
+            // Features
+            showBpmText: true,
+            showWaveform: true
+        };
+
+        // --- Initialization ---
+
+        function init() {
+            startHRPoll(); // From script.js
+
+            // Load config from server
+            fetch('/api/theme')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.theme) {
+                        try {
+                            const loaded = typeof data.theme === 'string' && data.theme.startsWith('{')
+                                ? JSON.parse(data.theme)
+                                : resolveThemeConfig(data.theme); // fallback
+
+                            // Merge loaded config into currentConfig
+                            // We need to handle legacy configs that might not have layoutMode explicitly
+                            currentConfig = { ...currentConfig, ...loaded };
+
+                            // Fix for legacy presets being loaded as object
+                            if (!currentConfig.layoutMode) currentConfig.layoutMode = 'full';
+
+                            syncUI();
+                        } catch (e) {
+                            console.error('Failed to parse config', e);
+                        }
+                    }
+                });
+
+            // Device polling
+            setInterval(() => {
+                if (isScanning) {
+                    fetch('/api/devices').then(r => r.json()).then(devices => {
                         const list = document.getElementById('device-list');
                         list.innerHTML = '';
                         devices.forEach(d => {
                             const li = document.createElement('li');
+                            li.className = 'device-li';
                             li.innerHTML = `
-                                <span>${d.name} <small>(${d.id})</small></span>
-                                <button onclick="connect('${d.id}')">连接</button>
-                            `;
+                            <div>
+                                <span class="device-name">${d.name}</span>
+                                <span class="device-id">(${d.id})</span>
+                            </div>
+                            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="connect('${d.id}')">连接</button>
+                        `;
                             list.appendChild(li);
                         });
                     });
+                }
+            }, 1000);
+        }
+
+        // --- Actions ---
+
+        function applyPreset(name) {
+            const preset = THEME_PRESETS[name];
+            if (!preset) return;
+
+            // Apply visual properties
+            currentConfig.textColor = preset.textColor;
+            currentConfig.waveformColor = preset.textColor; // Default waveform to text color
+            currentConfig.font = preset.font;
+            currentConfig.heartColor = preset.heartColor;
+            currentConfig.heartFilter = preset.heartFilter || 'none';
+            currentConfig.pulseColor = preset.pulseColor;
+            currentConfig.pulseBorder = preset.pulseBorder || null;
+            currentConfig.pulseShadow = preset.pulseShadow || null;
+            currentConfig.pulseBackground = preset.pulseBackground || null;
+            currentConfig.animation = preset.animation;
+            currentConfig.showBpmText = preset.showBpmText !== undefined ? preset.showBpmText : true;
+            currentConfig.showWaveform = preset.showWaveform !== undefined ? preset.showWaveform : false;
+
+            // Only update card bg if in card mode or if we want to suggest it?
+            // Let's update it in the picker, but it only applies if card mode is on.
+            if (preset.cardBg) {
+                currentConfig.bgColor = preset.cardBg;
             }
-        }, 1000);
+
+            // Highlight active preset
+            document.querySelectorAll('.theme-item').forEach(el => el.classList.remove('active'));
+            // Find the one clicked - simplistic approach
+            const items = document.querySelectorAll('.theme-item');
+            if (name === 'default') items[0].classList.add('active');
+            if (name === 'cyberpunk') items[1].classList.add('active');
+            if (name === 'minimal') items[2].classList.add('active');
+            if (name === 'nature') items[3].classList.add('active');
+            if (name === 'retro') items[4].classList.add('active');
+
+            syncUI();
+        }
+
+        function updateUI() {
+            // Read values from inputs into currentConfig
+            currentConfig.textColor = document.getElementById('text-color').value;
+            currentConfig.heartColor = document.getElementById('heart-color').value;
+            currentConfig.pulseColor = document.getElementById('pulse-color').value;
+            currentConfig.waveformColor = document.getElementById('waveform-color').value;
+            currentConfig.font = document.getElementById('font-family').value;
+            currentConfig.animation = document.getElementById('animation-type').value;
+
+            // Features
+            currentConfig.showBpmText = document.getElementById('show-bpm-text').checked;
+            currentConfig.showWaveform = document.getElementById('show-waveform').checked;
+            currentConfig.waveformMode = document.getElementById('waveform-mode').value;
+
+            // Text Shadow / Glow
+            const shadowColor = document.getElementById('text-shadow-color').value;
+            const shadowBlur = document.getElementById('text-shadow-blur').value;
+            currentConfig.textShadowColor = shadowColor;
+            currentConfig.textShadowBlur = shadowBlur;
+
+            if (parseInt(shadowBlur) > 0) {
+                currentConfig.textShadow = `0 0 ${shadowBlur}px ${shadowColor}`;
+            } else {
+                currentConfig.textShadow = 'none';
+            }
+
+            // Layout
+            const isCard = document.getElementById('layout-toggle').checked;
+            currentConfig.layoutMode = isCard ? 'card' : 'full';
+
+            // Card Settings
+            currentConfig.bgColor = document.getElementById('card-bg-color').value;
+            currentConfig.bgOpacity = parseFloat(document.getElementById('card-bg-opacity').value);
+            currentConfig.boxRadius = document.getElementById('card-radius').value + 'px';
+
+            const shadowStrength = parseFloat(document.getElementById('card-shadow-strength').value);
+            currentConfig.boxShadowStrength = shadowStrength;
+
+            // Generate shadow string based on strength
+            if (shadowStrength === 0) {
+                currentConfig.boxShadow = 'none';
+            } else {
+                const opacity = (shadowStrength * 0.5).toFixed(2);
+                currentConfig.boxShadow = `0 8px 24px rgba(0,0,0,${opacity})`;
+            }
+
+            // Toggle visibility of card options
+            const cardOptions = document.getElementById('card-options');
+            if (isCard) {
+                cardOptions.style.opacity = '1';
+                cardOptions.style.pointerEvents = 'auto';
+            } else {
+                cardOptions.style.opacity = '0.5';
+                cardOptions.style.pointerEvents = 'none';
+            }
+
+            // Render Preview
+            renderPreview();
+        }
+
+        function syncUI() {
+            // Update inputs from currentConfig
+            document.getElementById('text-color').value = currentConfig.textColor || '#333333';
+            document.getElementById('heart-color').value = currentConfig.heartColor || '#ff4d4d';
+            document.getElementById('waveform-color').value = currentConfig.waveformColor || currentConfig.textColor || '#333333';
+
+            // Handle pulse color being transparent or hex
+            if (currentConfig.pulseColor && currentConfig.pulseColor !== 'transparent') {
+                document.getElementById('pulse-color').value = currentConfig.pulseColor;
+            }
+
+            document.getElementById('font-family').value = currentConfig.font || "'Roboto', sans-serif";
+            document.getElementById('animation-type').value = currentConfig.animation || 'beat';
+
+            document.getElementById('show-bpm-text').checked = (currentConfig.showBpmText !== false);
+            document.getElementById('show-waveform').checked = (currentConfig.showWaveform === true);
+            document.getElementById('waveform-mode').value = currentConfig.waveformMode || 'ecg';
+
+            document.getElementById('layout-toggle').checked = (currentConfig.layoutMode === 'card');
+
+            if (currentConfig.bgColor && currentConfig.bgColor !== 'transparent') {
+                document.getElementById('card-bg-color').value = currentConfig.bgColor;
+            }
+
+            document.getElementById('card-bg-opacity').value = currentConfig.bgOpacity !== undefined ? currentConfig.bgOpacity : 1;
+            document.getElementById('card-radius').value = parseInt(currentConfig.boxRadius) || 10;
+
+            // We stored strength? If not, estimate or default
+            document.getElementById('card-shadow-strength').value = currentConfig.boxShadowStrength !== undefined ? currentConfig.boxShadowStrength : 0.2;
+
+            // Text Shadow inputs
+            document.getElementById('text-shadow-color').value = currentConfig.textShadowColor || '#000000';
+            document.getElementById('text-shadow-blur').value = currentConfig.textShadowBlur || 0;
+
+            // Update visibility of card options
+            const isCard = (currentConfig.layoutMode === 'card');
+            const cardOptions = document.getElementById('card-options');
+            if (isCard) {
+                cardOptions.style.opacity = '1';
+                cardOptions.style.pointerEvents = 'auto';
+            } else {
+                cardOptions.style.opacity = '0.5';
+                cardOptions.style.pointerEvents = 'none';
+            }
+
+            // Trigger Render directly to avoid overwriting complex shadows with simple inputs
+            renderPreview();
+        }
+
+        function renderPreview() {
+            const previewWrapper = document.getElementById('preview-wrapper');
+            const container = document.getElementById('heart-rate-container');
+
+            // Reset Styles
+            previewWrapper.style.backgroundColor = '#e0e0e0'; // Checkerboard base
+
+            // Prepare config for applyConfigToElement
+            // We need to ensure we pass the right properties that script.js expects
+            const renderConfig = { ...currentConfig };
+
+            // In the real widget, 'full' mode means body has bg. 
+            // In preview, 'full' mode means previewWrapper has bg.
+            // But if 'full' mode has transparent bg (which we force/assume), then previewWrapper shows checkerboard.
+
+            if (renderConfig.layoutMode === 'full') {
+                renderConfig.bgColor = 'transparent';
+            } else {
+                // Card mode: ensure bgColor is the card color
+                // renderConfig.bgColor is already set from input
+            }
+
+            applyConfigToElement(previewWrapper, renderConfig);
+
+            // Special Preview Adjustment:
+            // If in full mode and transparent, we want to see the checkerboard, 
+            // so we make sure previewWrapper background-image is visible.
+            // applyConfigToElement sets backgroundColor. 
+            // If it sets it to 'transparent', our CSS checkerboard shows through.
+            // Perfect.
+        }
+
+        function saveConfig() {
+            const btn = document.querySelector('button[onclick="saveConfig()"]');
+            const originalText = btn.innerText;
+            btn.innerText = '保存中...';
+            btn.disabled = true;
+
+            // If in Full Mode, force transparent bg in the saved config to avoid users accidentally setting a color
+            const configToSave = { ...currentConfig };
+            if (configToSave.layoutMode === 'full') {
+                configToSave.bgColor = 'transparent';
+            }
+
+            fetch('/api/theme', {
+                method: 'POST',
+                body: JSON.stringify({ theme: JSON.stringify(configToSave) }),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(r => {
+                if (r.ok) {
+                    btn.innerText = '已保存';
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }, 1000);
+                } else {
+                    alert('保存失败');
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            }).catch(e => {
+                alert('保存失败: ' + e);
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        // Init
+        init();
+
     </script>
 </body>
 

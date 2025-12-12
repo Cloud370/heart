@@ -10,16 +10,29 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  /* Default text color */
+  color: #333;
+  font-family: 'Roboto', sans-serif;
 }
 
 /* Base Container Layout */
 #heart-rate-container {
   display: flex;
+  flex-direction: column; /* Changed to column to stack waveform below */
   align-items: center;
   justify-content: center;
   padding: 10px;
   box-sizing: border-box;
   transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  min-width: 150px; /* Ensure some width */
+  margin: 20px; /* Add margin to prevent shadow clipping */
+}
+
+.top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
 .heart-visual {
@@ -30,13 +43,24 @@ body {
   align-items: center;
   justify-content: center;
   margin-right: 15px;
+  flex-shrink: 0;
 }
 
 .heart-svg {
   width: 100%;
   height: 100%;
-  fill: currentColor;
+  fill: #ff4d4d; /* Default heart color */
   animation: beat 1s infinite;
+}
+
+/* Disconnected state */
+.heart-visual.disconnected .heart-svg {
+  animation: none;
+  opacity: 0.3;
+}
+.heart-visual.disconnected .heart-pulse-ring {
+  animation: none;
+  opacity: 0;
 }
 
 .heart-pulse-ring {
@@ -49,6 +73,7 @@ body {
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
+  border: 1px solid #ff4d4d;
 }
 
 .value-wrapper {
@@ -101,135 +126,74 @@ body {
   }
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
+/* --- THEMES --- */
+
+/* Cyberpunk */
+.theme-cyberpunk {
+  color: #0ff !important;
+  font-family: 'Orbitron', sans-serif !important;
+  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+}
+.theme-cyberpunk .heart-svg {
+  fill: #f0f !important;
+  filter: drop-shadow(0 0 5px #f0f);
+}
+.theme-cyberpunk .heart-pulse-ring {
+  border: 2px solid #0ff !important;
+  box-shadow: 0 0 10px #0ff;
+  animation: pulse-ring 1s cubic-bezier(0.215, 0.61, 0.355, 1) infinite !important;
 }
 
-@keyframes scanline {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100%);
-  }
+/* Minimal */
+.theme-minimal {
+  color: #000 !important;
+  font-family: 'Roboto', sans-serif !important;
+  text-shadow: none !important;
+}
+.theme-minimal .heart-svg {
+  fill: #000 !important;
+  filter: none !important;
+}
+.theme-minimal .heart-pulse-ring {
+  border: 1px solid #000 !important;
+  box-shadow: none !important;
 }
 
-/* ================= THEMES ================= */
+/* Nature */
+.theme-nature {
+  color: #2e8b57 !important;
+  font-family: 'Montserrat', sans-serif !important;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+.theme-nature .heart-svg {
+  fill: #2e8b57 !important;
+}
+.theme-nature .heart-pulse-ring {
+  border: none !important;
+  background: rgba(46, 139, 87, 0.2);
+  animation: pulse-ring 2s infinite !important;
+}
 
-/* 1. Default (Clean Modern) */
-.theme-default #heart-rate-container {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 50px;
-  padding: 10px 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  font-family: "Roboto", sans-serif;
+/* Retro */
+.theme-retro {
+  color: #ffcc00 !important;
+  font-family: 'Press Start 2P', cursive !important;
+  text-shadow: 2px 2px 0 #330000;
+}
+.theme-retro .heart-svg {
+  fill: #cc0000 !important;
+  filter: drop-shadow(2px 2px 0 #330000);
+  animation-timing-function: steps(2) !important;
+}
+.theme-retro .heart-pulse-ring {
+  border: 4px solid #cc0000 !important;
+  border-radius: 0 !important;
+}
+
+/* Default explicitly */
+.theme-default {
   color: #333;
 }
 .theme-default .heart-svg {
-  fill: #ff4757;
-  filter: drop-shadow(0 2px 4px rgba(255, 71, 87, 0.4));
-}
-.theme-default #heart-rate-value {
-  color: #2f3542;
-}
-
-/* 2. Cyberpunk (Neon) */
-.theme-cyberpunk #heart-rate-container {
-  background: rgba(0, 0, 0, 0.8);
-  border: 2px solid #00f3ff;
-  border-radius: 5px;
-  padding: 15px 30px;
-  box-shadow: 0 0 15px #00f3ff, inset 0 0 10px rgba(0, 243, 255, 0.2);
-  font-family: "Orbitron", sans-serif;
-  color: #fff;
-  clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
-}
-.theme-cyberpunk .heart-visual {
-  margin-right: 20px;
-}
-.theme-cyberpunk .heart-svg {
-  fill: #ff0055;
-  filter: drop-shadow(0 0 8px #ff0055);
-  animation: beat 0.8s infinite;
-}
-.theme-cyberpunk #heart-rate-value {
-  color: #00f3ff;
-  text-shadow: 0 0 10px #00f3ff;
-}
-.theme-cyberpunk .heart-pulse-ring {
-  border: 2px solid #ff0055;
-  animation: pulse-ring 1s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-}
-
-/* 3. Minimal (Glassmorphism) */
-.theme-minimal #heart-rate-container {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  padding: 15px 25px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-  font-family: "Roboto", sans-serif;
-  color: #fff;
-}
-.theme-minimal .heart-svg {
-  fill: #fff;
-  opacity: 0.9;
-}
-.theme-minimal #heart-rate-value {
-  font-weight: 300;
-}
-
-/* 4. Nature (Organic) */
-.theme-nature #heart-rate-container {
-  background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
-  border-radius: 20px 0 20px 0;
-  padding: 15px 35px;
-  font-family: "Montserrat", sans-serif;
-  box-shadow: 5px 5px 15px rgba(46, 139, 87, 0.4);
-  animation: float 3s ease-in-out infinite;
-}
-.theme-nature .heart-svg {
-  fill: #fff;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
-}
-.theme-nature #heart-rate-value {
-  color: #fff;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* 5. Retro (Pixel Art) */
-.theme-retro #heart-rate-container {
-  background: #2c3e50;
-  border: 4px solid #fff;
-  outline: 4px solid #2c3e50;
-  padding: 15px 20px;
-  font-family: "Press Start 2P", cursive;
-  image-rendering: pixelated;
-  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
-}
-.theme-retro .heart-visual {
-  width: 40px;
-  height: 40px;
-}
-.theme-retro .heart-svg {
-  fill: #e74c3c;
-  /* Simulate pixel heart with steps if possible, or just use the font */
-  animation: beat 1s steps(2) infinite; /* Jerky animation */
-}
-.theme-retro #heart-rate-value {
-  color: #f1c40f;
-  font-size: 32px; /* Smaller font for pixel font */
-  margin-top: 5px;
-}
-.theme-retro #heart-rate-unit {
-  color: #ecf0f1;
-  font-size: 10px;
+  fill: #ff4d4d;
 }

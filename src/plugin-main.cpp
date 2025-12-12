@@ -23,7 +23,7 @@ OBS_MODULE_USE_DEFAULT_LOCALE("miband-heart-rate", "en-US")
 static std::shared_ptr<BleManager> g_ble;
 static std::unique_ptr<httplib::Server> g_server;
 static std::thread g_server_thread;
-static std::atomic<int> g_latest_hr{0};
+static std::atomic<int> g_latest_hr{-1};
 static std::string g_web_dir;
 static std::string g_theme = "default";
 static std::string g_last_device_id = "";
@@ -64,7 +64,10 @@ static void load_config() {
     }
 }
 
+static std::mutex g_config_mutex;
+
 static void save_config() {
+    std::lock_guard<std::mutex> lock(g_config_mutex);
     if (g_config_path.empty()) return;
     
     // Ensure directory exists
@@ -147,7 +150,7 @@ static void check_and_create_source() {
         obs_data_t* settings = obs_data_create();
         obs_data_set_string(settings, "url", url.c_str());
         obs_data_set_int(settings, "width", 350);
-        obs_data_set_int(settings, "height", 120);
+        obs_data_set_int(settings, "height", 150);
         obs_data_set_int(settings, "fps", 60);
         obs_data_set_bool(settings, "is_local_file", false);
         
@@ -212,36 +215,87 @@ static void start_http_server() {
     // API: Heart Rate
     g_server->Get("/api/hr", [](const httplib::Request&, httplib::Response& res) {
         std::stringstream ss;
-        ss << "{\"hr\": " << g_latest_hr << "}";
+        int hr = -1;
+        if (g_ble && g_ble->IsConnected()) {
+            hr = g_latest_hr;
+        }
+        ss << "{\"hr\": " << hr << "}";
         res.set_content(ss.str(), "application/json");
         res.set_header("Access-Control-Allow-Origin", "*");
     });
 
+    // API: Disconnect
+    g_server->Post("/api/disconnect", [](const httplib::Request&, httplib::Response& res) {
+        if (g_ble) {
+            g_ble->Disconnect();
+            g_latest_hr = -1;
+            res.set_content("{\"status\": \"disconnected\"}", "application/json");
+        } else {
+            res.status = 500;
+        }
+    });
+
+    // API: Reset
+    g_server->Post("/api/reset", [](const httplib::Request&, httplib::Response& res) {
+        if (g_ble) {
+            g_ble->Disconnect();
+        }
+        g_latest_hr = -1;
+        {
+            std::lock_guard<std::mutex> lock(g_config_mutex);
+            g_last_device_id = "";
+        }
+        save_config();
+        res.set_content("{\"status\": \"reset\"}", "application/json");
+    });
+
     // API: Get Theme
     g_server->Get("/api/theme", [](const httplib::Request&, httplib::Response& res) {
-        std::stringstream ss;
-        ss << "{\"theme\": \"" << g_theme << "\"}";
-        res.set_content(ss.str(), "application/json");
+        std::string theme;
+        {
+            std::lock_guard<std::mutex> lock(g_config_mutex);
+            theme = g_theme;
+        }
+        
+        obs_data_t *data = obs_data_create();
+        obs_data_set_string(data, "theme", theme.c_str());
+        const char* json = obs_data_get_json(data);
+        if (json) {
+             res.set_content(json, "application/json");
+        } else {
+             res.status = 500;
+        }
+        obs_data_release(data);
     });
 
     // API: Set Theme
     g_server->Post("/api/theme", [](const httplib::Request& req, httplib::Response& res) {
         std::string body = req.body;
-        size_t pos = body.find("\"theme\"");
-        if (pos != std::string::npos) {
-            size_t start = body.find("\"", pos + 7);
-            if (start != std::string::npos) {
-                start++;
-                size_t end = body.find("\"", start);
-                if (end != std::string::npos) {
-                    g_theme = body.substr(start, end - start);
-                    save_config();
-                    res.set_content("{\"status\": \"ok\"}", "application/json");
-                    return;
-                }
+        blog(LOG_INFO, "API Set Theme Request Body: %s", body.c_str());
+        
+        std::string new_theme;
+        obs_data_t *data = obs_data_create_from_json(body.c_str());
+        if (data) {
+            const char* val = obs_data_get_string(data, "theme");
+            if (val) {
+                 new_theme = val;
             }
+            obs_data_release(data);
         }
-        res.status = 400;
+
+        if (!new_theme.empty()) {
+            blog(LOG_INFO, "Setting theme to: %s", new_theme.c_str());
+            {
+                std::lock_guard<std::mutex> lock(g_config_mutex);
+                g_theme = new_theme;
+            }
+            // save_config locks internally, so we release our lock first
+            save_config();
+            res.set_content("{\"status\": \"ok\"}", "application/json");
+        } else {
+            blog(LOG_WARNING, "Failed to parse theme");
+            res.status = 400;
+        }
     });
 
     // API: Start Scan
@@ -327,7 +381,11 @@ static void start_http_server() {
         
         if (g_ble) {
             g_ble->Connect(id);
-            g_last_device_id = id;
+            g_latest_hr = -1;
+            {
+                std::lock_guard<std::mutex> lock(g_config_mutex);
+                g_last_device_id = id;
+            }
             save_config();
             res.set_content("{\"status\": \"connecting\"}", "application/json");
         } else {
